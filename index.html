@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUBYRED | Interactive Birthday Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root { --ruby: #ff0000; --gold: #d4af37; --dark: #1a1a1a; --soft-bg: #f4f7f6; }
+        body { background: var(--soft-bg); font-family: 'Poppins', 'Cairo', sans-serif; padding-bottom: 50px; }
+        
+        /* Navbar */
+        .navbar { background: var(--dark); border-bottom: 4px solid var(--ruby); padding: 15px; position: sticky; top: 0; z-index: 1000; }
+        .navbar-brand { font-weight: 800; color: white !important; font-size: 1.8rem; }
+        .red-text { color: var(--ruby); }
+
+        /* Dashboard Stats - Interactive */
+        .stat-card { 
+            background: white; border-radius: 15px; padding: 20px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #ddd; 
+            cursor: pointer; transition: 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .stat-card.active-filter { border-left-width: 10px; background: #fffdfd; border-left-color: var(--dark); }
+        .stat-card.alert { border-left-color: var(--ruby); }
+        .stat-card h3 { font-weight: 800; margin: 0; color: var(--dark); }
+
+        /* Pulse Animation */
+        @keyframes glowing-pulse {
+            0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.4); border-color: rgba(255, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.7); border-color: var(--ruby); transform: scale(1.02); }
+            100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.4); border-color: rgba(255, 0, 0, 0.5); }
+        }
+        .pulse-border { animation: glowing-pulse 1.5s infinite ease-in-out; border: 2px solid var(--ruby) !important; }
+
+        .card-box { background: white; border-radius: 15px; padding: 25px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+        /* Studio Overlay */
+        #studioOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 9999; overflow-y: auto; padding: 20px;
+        }
+        .studio-nav { background: #000; padding: 15px; border-radius: 10px; display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+
+        /* Birthday Card Design */
+        #printableCard {
+            width: 100%; max-width: 750px; background: white; margin: 0 auto;
+            padding: 50px; border: 15px double var(--gold); text-align: center; 
+            position: relative; direction: rtl; overflow: hidden;
+        }
+        /* زينة الكارت */
+        #printableCard::before { content: '🎈'; position: absolute; top: 15px; left: 15px; font-size: 50px; opacity: 0.4; }
+        #printableCard::after { content: '🎊'; position: absolute; bottom: 15px; right: 15px; font-size: 50px; opacity: 0.4; }
+
+        .photo-frame { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--gold); margin: 0 auto 25px; overflow: hidden; background: #eee; position: relative; z-index: 2; }
+        #empPhoto { width: 100%; height: 100%; object-fit: cover; }
+        
+        .editable-field { font-family: 'Cairo', sans-serif; border-radius: 5px; transition: 0.2s; padding: 5px; font-weight: bold; }
+        .editable-field:focus { background: #fff9e6; outline: none; box-shadow: 0 0 5px var(--gold); }
+        .logo { height: 60px;
+        position: relative; right:5%;  
+        animation: spin 4s linear infinite;
+      transform-origin: center center !important;
+      display: block;
+}
+@keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    </style>
+</head>
+<body>
+
+<nav class="navbar no-print">
+    <div class="container d-flex justify-content-between">
+        <a class="navbar-brand" href="#">RUBY<span class="red-text">RED</span> GARMENT</a>
+        <img class="logo" src="pic/logooo.png" alt="">
+        <span class="text-white-50">BIRTHDAY SYSTEM</span>
+    </div>
+</nav>
+
+<div class="container no-print mt-4">
+    <div class="row g-3">
+        <div class="col-md-4" onclick="applyFilter('today')">
+            <div id="filterToday" class="stat-card">
+                <p>Today's Celebrations</p>
+                <h3 id="statToday">0</h3>
+            </div>
+        </div>
+        <div class="col-md-4" onclick="applyFilter('near')">
+            <div id="filterNear" class="stat-card alert">
+                <p>Urgent Pulses (Next 5 Days)</p>
+                <h3 id="statPulse" class="red-text">0</h3>
+            </div>
+        </div>
+        <div class="col-md-4" onclick="applyFilter('all')">
+            <div id="filterAll" class="stat-card active-filter">
+                <p>Total This Month</p>
+                <h3 id="statMonth">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-box">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold m-0 text-secondary" id="gridTitle">🗓️ Monthly Birthday Calendar</h5>
+            <span class="badge bg-dark" id="filterStatus">Showing: All Month</span>
+        </div>
+        <div id="monthGrid" class="row g-3"></div>
+    </div>
+</div>
+
+<div id="studioOverlay">
+    <div class="studio-nav no-print">
+        <label class="btn btn-outline-light btn-sm">📸 رفع صورة <input type="file" hidden onchange="loadPhoto(event)"></label>
+        <button class="btn btn-success btn-sm px-4" onclick="saveAsImage()">💾 حفظ كصورة</button>
+        <button class="btn btn-primary btn-sm px-4" onclick="window.print()">🖨️ طباعة</button>
+        <button class="btn btn-danger btn-sm" onclick="closeStudio()">✕ إغلاق</button>
+    </div>
+
+    <div id="printableCard">
+        <h1 style="color:#000; font-weight:900; margin:0; font-size: 45px; letter-spacing: 1px;">
+            RUBY<span style="color:var(--ruby)">RED</span> GARMENT
+        </h1>
+        <p style="color:var(--gold); font-weight:900; letter-spacing:5px; font-size:14px; margin-bottom: 30px; text-transform: uppercase;">Official Birthday Card</p>
+        
+        <div class="photo-frame"><img id="empPhoto" src="https://via.placeholder.com/150?text=صورة+الموظف"></div>
+        
+        <div id="empNameInCard" class="editable-field" contenteditable="true" style="font-size:38px; font-weight:900; color:#1a1a1a; margin-bottom:5px;">اسم الموظف هنا</div>
+        <div id="cardBdayDisplay" class="editable-field" contenteditable="true" style="color:var(--gold); font-weight:900; margin-bottom:25px; font-size: 22px;">01 يناير 2026</div>
+        
+        <div class="editable-field" contenteditable="true" style="font-size:22px; color:#333; line-height:1.7; max-width:90%; margin:0 auto; font-weight: 700;">
+            تتقدم إدارة شركة RUBYRED GARMENT بأصدق التهاني بمناسبة عيد ميلادكم السعيد، متمنين لكم عاماً مليئاً بالنجاح والتوفيق في مسيرتكم المهنية معنا.
+        </div>
+        
+        <h2 style="color:var(--ruby); margin-top:40px; font-weight:900; font-size: 38px;">كل عام وأنتم بخير</h2>
+        
+        <div class="editable-field" contenteditable="true" style="margin-top: 25px; font-weight: 900; font-size: 26px;">
+            RUBY<span style="color:red">RED</span> GARMENT
+        </div>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwR43frr6oz2hrBVzNMxbqGN3jn6rbwzI3iNgOWCkWtknLWLrTW6eO7akPT7DLyURZGVg/exec"; 
+    let allEmployees = [];
+    let currentFilter = 'all';
+
+    async function fetchData() {
+        try {
+            const res = await fetch(SCRIPT_URL);
+            allEmployees = await res.json();
+            updateDashboard();
+        } catch (e) { console.error("Error", e); }
+    }
+
+    function updateDashboard() {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        let countToday = 0, countNear = 0, countMonth = 0;
+
+        allEmployees.forEach(emp => {
+            if(!emp.birthdate) return;
+            const bDate = new Date(emp.birthdate);
+            const bThisYear = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
+            const diffDays = Math.round((bThisYear - today) / (1000 * 60 * 60 * 24));
+            
+            if(bDate.getMonth() === today.getMonth()) countMonth++;
+            if(bDate.getDate() === today.getDate() && bDate.getMonth() === today.getMonth()) countToday++;
+            if(diffDays > 0 && diffDays <= 5) countNear++;
+        });
+
+        document.getElementById('statToday').innerText = countToday;
+        document.getElementById('statPulse').innerText = countNear;
+        document.getElementById('statMonth').innerText = countMonth;
+
+        renderGrid();
+    }
+
+    function applyFilter(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
+        
+        if(filter === 'today') document.getElementById('filterToday').classList.add('active-filter');
+        if(filter === 'near') document.getElementById('filterNear').classList.add('active-filter');
+        if(filter === 'all') document.getElementById('filterAll').classList.add('active-filter');
+
+        document.getElementById('filterStatus').innerText = "Showing: " + filter.toUpperCase();
+        renderGrid();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('monthGrid');
+        grid.innerHTML = '';
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        allEmployees.forEach(emp => {
+            const bDate = new Date(emp.birthdate);
+            const bThisYear = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
+            const diffDays = Math.round((bThisYear - today) / (1000 * 60 * 60 * 24));
+            
+            const isToday = (bDate.getDate() === today.getDate() && bDate.getMonth() === today.getMonth());
+            const isNear = (diffDays > 0 && diffDays <= 5);
+            const isThisMonth = (bDate.getMonth() === today.getMonth());
+
+            if(currentFilter === 'today' && !isToday) return;
+            if(currentFilter === 'near' && !isNear) return;
+            if(currentFilter === 'all' && !isThisMonth) return;
+
+            if(isThisMonth || isToday) {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-3 col-lg-2';
+                col.innerHTML = `
+                    <div class="p-3 border rounded bg-white text-center h-100 ${isNear ? 'pulse-border' : ''} ${isToday ? 'border-success' : ''}" 
+                         style="cursor:pointer" onclick="openStudio('${emp.name}', '${bDate.toLocaleDateString('ar-EG', {day:'numeric', month:'long'})}')">
+                        <div class="fw-bold" style="font-size:13px;">${emp.name}</div>
+                        <div class="text-muted small">${bDate.getDate()} ${bDate.toLocaleString('en', {month:'short'})}</div>
+                        ${isNear ? `<span class="badge bg-danger mt-2">خلال ${diffDays} أيام</span>` : ''}
+                        ${isToday ? `<span class="badge bg-success mt-2">اليوم 🎉</span>` : ''}
+                    </div>
+                `;
+                grid.appendChild(col);
+            }
+        });
+    }
+
+    function openStudio(name, date) {
+        document.getElementById('studioOverlay').style.display = 'block';
+        document.getElementById('empNameInCard').innerText = name;
+        document.getElementById('cardBdayDisplay').innerText = date;
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeStudio() {
+        document.getElementById('studioOverlay').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function loadPhoto(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            document.getElementById('empPhoto').src = reader.result;
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+    function saveAsImage() {
+        const card = document.getElementById('printableCard');
+        html2canvas(card, { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Birthday_${document.getElementById('empNameInCard').innerText}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+
+    fetchData();
+</script>
+</body>
+</html>
