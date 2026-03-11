@@ -342,34 +342,93 @@
             padding: 60px 50px 50px; text-align: center;
             position: relative; direction: rtl;
         }
-
-        /* Theme: Classic Dark */
-        .theme-dark .card-inner {
-            background: linear-gradient(145deg, #111 0%, #1a1a1a 50%, #111 100%);
-        }
-        .theme-dark .card-inner::before {
-            content: ''; position: absolute; inset: 0;
-            background-image: radial-gradient(circle at 80% 20%, rgba(232,0,29,0.08) 0%, transparent 50%),
-                              radial-gradient(circle at 20% 80%, rgba(201,153,58,0.06) 0%, transparent 50%);
-        }
-
-        /* Theme: Ivory */
-        .theme-ivory .card-inner {
-            background: linear-gradient(145deg, #fdf8f0 0%, #fff9ed 60%, #fdf8f0 100%);
-        }
-        .theme-ivory .card-title { color: #1a1a1a !important; }
-        .theme-ivory .card-subtitle { color: #888 !important; }
-        .theme-ivory .card-name  { color: #1a1a1a !important; }
-        .theme-ivory .card-msg   { color: #444 !important; }
-        .theme-ivory .card-footer-brand { color: #1a1a1a !important; }
-
-        /* Theme: Ruby */
-        .theme-ruby .card-inner {
-            background: linear-gradient(145deg, #1a0000 0%, #200006 50%, #1a0000 100%);
-        }
-
-        /* Card border */
         #printableCard { border: 2px solid rgba(201,153,58,0.3); }
+
+        /* 1 — Dark Classic */
+        .theme-dark .card-inner { background: linear-gradient(145deg,#111 0%,#1a1a1a 50%,#111 100%); }
+        .theme-dark .card-inner::before { content:''; position:absolute; inset:0;
+            background: radial-gradient(circle at 80% 20%,rgba(232,0,29,.08) 0%,transparent 50%),
+                        radial-gradient(circle at 20% 80%,rgba(201,153,58,.06) 0%,transparent 50%); }
+
+        /* 2 — Ivory Luxury */
+        .theme-ivory .card-inner { background: linear-gradient(145deg,#fdf8f0 0%,#fff9ed 60%,#fdf8f0 100%); }
+        .theme-ivory .card-title,.theme-ivory .card-name,.theme-ivory .card-footer-brand { color:#1a1a1a !important; }
+        .theme-ivory .card-subtitle { color:#888 !important; }
+        .theme-ivory .card-msg { color:#444 !important; }
+        .theme-ivory .card-footer-stamp { color:#aaa !important; }
+        .theme-ivory #printableCard { border-color:rgba(201,153,58,.5); }
+
+        /* 3 — Deep Ruby */
+        .theme-ruby .card-inner { background: linear-gradient(145deg,#1a0004 0%,#2d0008 40%,#1a0004 100%); }
+        .theme-ruby .card-inner::before { content:''; position:absolute; inset:0;
+            background: radial-gradient(circle at 50% 30%,rgba(232,0,29,.18) 0%,transparent 60%); }
+
+        /* 4 — Ocean Blue */
+        .theme-ocean .card-inner { background: linear-gradient(145deg,#020c1b 0%,#0a1f3c 50%,#020c1b 100%); }
+        .theme-ocean .card-inner::before { content:''; position:absolute; inset:0;
+            background: radial-gradient(circle at 70% 30%,rgba(0,120,255,.12) 0%,transparent 55%); }
+        .theme-ocean .card-date { color:#4fc3f7 !important; }
+        .theme-ocean .card-headline { color:#4fc3f7 !important; }
+        .theme-ocean .gold-divider { background: linear-gradient(90deg,transparent,#4fc3f7,transparent) !important; }
+        .theme-ocean .card-footer-brand span { color:#4fc3f7 !important; }
+
+        /* 5 — Forest Green */
+        .theme-forest .card-inner { background: linear-gradient(145deg,#031a0e 0%,#052e18 50%,#031a0e 100%); }
+        .theme-forest .card-inner::before { content:''; position:absolute; inset:0;
+            background: radial-gradient(circle at 40% 60%,rgba(34,197,94,.1) 0%,transparent 55%); }
+        .theme-forest .card-date { color:#4ade80 !important; }
+        .theme-forest .card-headline { color:#4ade80 !important; }
+        .theme-forest .gold-divider { background: linear-gradient(90deg,transparent,#4ade80,transparent) !important; }
+        .theme-forest .card-footer-brand span { color:#4ade80 !important; }
+
+        /* 6 — Royal Purple */
+        .theme-purple .card-inner { background: linear-gradient(145deg,#0d0618 0%,#1a0d2e 50%,#0d0618 100%); }
+        .theme-purple .card-inner::before { content:''; position:absolute; inset:0;
+            background: radial-gradient(circle at 60% 25%,rgba(168,85,247,.14) 0%,transparent 55%); }
+        .theme-purple .card-date { color:#c084fc !important; }
+        .theme-purple .card-headline { color:#c084fc !important; }
+        .theme-purple .gold-divider { background: linear-gradient(90deg,transparent,#c084fc,transparent) !important; }
+        .theme-purple .card-footer-brand span { color:#c084fc !important; }
+
+        /* 7 — Midnight Gold */
+        .theme-gold .card-inner { background: linear-gradient(145deg,#0a0800 0%,#1a1200 50%,#0a0800 100%); }
+        .theme-gold .card-inner::before { content:''; position:absolute; inset:0;
+            background: radial-gradient(circle at 50% 50%,rgba(201,153,58,.12) 0%,transparent 60%); }
+        .theme-gold .card-date { color:#f0c060 !important; }
+        .theme-gold .card-headline { color:#f0c060 !important; }
+        .theme-gold .card-footer-brand span { color:#f0c060 !important; }
+
+        /* 8 — Sunset Orange */
+        .theme-sunset .card-inner { background: linear-gradient(145deg,#1a0800 0%,#2d1000 40%,#1a0800 100%); }
+        .theme-sunset .card-inner::before { content:''; position:absolute; inset:0;
+            background: radial-gradient(circle at 70% 20%,rgba(251,146,60,.14) 0%,transparent 55%),
+                        radial-gradient(circle at 30% 80%,rgba(239,68,68,.08) 0%,transparent 50%); }
+        .theme-sunset .card-date { color:#fb923c !important; }
+        .theme-sunset .card-headline { color:#fb923c !important; }
+        .theme-sunset .gold-divider { background: linear-gradient(90deg,transparent,#fb923c,transparent) !important; }
+        .theme-sunset .card-footer-brand span { color:#fb923c !important; }
+
+        /* 9 — Rose Blush (light) */
+        .theme-rose .card-inner { background: linear-gradient(145deg,#fff0f3 0%,#ffe4ea 60%,#fff0f3 100%); }
+        .theme-rose .card-title,.theme-rose .card-name,.theme-rose .card-footer-brand { color:#1a1a1a !important; }
+        .theme-rose .card-subtitle { color:#999 !important; }
+        .theme-rose .card-msg { color:#555 !important; }
+        .theme-rose .card-date { color:#e8427a !important; }
+        .theme-rose .card-headline { color:#e8427a !important; }
+        .theme-rose .gold-divider { background: linear-gradient(90deg,transparent,#e8427a,transparent) !important; }
+        .theme-rose .card-footer-brand span { color:#e8427a !important; }
+        .theme-rose .card-footer-stamp { color:#aaa !important; }
+
+        /* 10 — Sky Blue (light) */
+        .theme-sky .card-inner { background: linear-gradient(145deg,#eef7ff 0%,#dbeeff 60%,#eef7ff 100%); }
+        .theme-sky .card-title,.theme-sky .card-name,.theme-sky .card-footer-brand { color:#0d1a2e !important; }
+        .theme-sky .card-subtitle { color:#6b8cad !important; }
+        .theme-sky .card-msg { color:#334 !important; }
+        .theme-sky .card-date { color:#0077cc !important; }
+        .theme-sky .card-headline { color:#0077cc !important; }
+        .theme-sky .gold-divider { background: linear-gradient(90deg,transparent,#0077cc,transparent) !important; }
+        .theme-sky .card-footer-brand span { color:#0077cc !important; }
+        .theme-sky .card-footer-stamp { color:#6b8cad !important; }
 
         /* Decorative corners */
         .card-corner {
@@ -639,10 +698,17 @@
             📸 رفع صورة
             <input type="file" hidden accept="image/*" onchange="loadPhoto(event)">
         </label>
-        <select class="month-select no-print" onchange="changeCardTheme(this.value)" style="font-size:0.8rem;">
+        <select class="month-select no-print" id="themeSelect" onchange="changeCardTheme(this.value)" style="font-size:0.8rem; min-width:190px;">
             <option value="theme-dark">🌑 Dark Classic</option>
             <option value="theme-ivory">🤍 Ivory Luxury</option>
             <option value="theme-ruby">❤️ Deep Ruby</option>
+            <option value="theme-ocean">🌊 Ocean Blue</option>
+            <option value="theme-forest">🌿 Forest Green</option>
+            <option value="theme-purple">💜 Royal Purple</option>
+            <option value="theme-gold">✨ Midnight Gold</option>
+            <option value="theme-sunset">🌅 Sunset Orange</option>
+            <option value="theme-rose">🌸 Rose Blush</option>
+            <option value="theme-sky">☀️ Sky Blue</option>
         </select>
         <button class="studio-btn s-btn-save" onclick="saveAsImage()">💾 حفظ كصورة</button>
         <button class="studio-btn s-btn-print" onclick="window.print()">🖨️ طباعة</button>
@@ -655,6 +721,20 @@
         <div id="phoneBadge" class="phone-badge no-phone" style="display:inline-flex;">
             <span>📵</span><span id="phoneBadgeText">لا يوجد رقم موبايل</span>
         </div>
+    </div>
+
+    <!-- Theme dots quick selector -->
+    <div class="no-print text-center mb-3" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;max-width:800px;margin:0 auto 14px;">
+        <div onclick="changeCardTheme('theme-dark')"   title="Dark Classic"   style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#111,#1a1a1a);border:2px solid rgba(255,255,255,.2);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
+        <div onclick="changeCardTheme('theme-ivory')"  title="Ivory Luxury"   style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#fdf8f0,#ffe);border:2px solid rgba(201,153,58,.4);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
+        <div onclick="changeCardTheme('theme-ruby')"   title="Deep Ruby"      style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1a0004,#2d0008);border:2px solid rgba(232,0,29,.5);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
+        <div onclick="changeCardTheme('theme-ocean')"  title="Ocean Blue"     style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#020c1b,#0a1f3c);border:2px solid rgba(0,120,255,.4);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
+        <div onclick="changeCardTheme('theme-forest')" title="Forest Green"   style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#031a0e,#052e18);border:2px solid rgba(34,197,94,.4);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
+        <div onclick="changeCardTheme('theme-purple')" title="Royal Purple"   style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0d0618,#1a0d2e);border:2px solid rgba(168,85,247,.4);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
+        <div onclick="changeCardTheme('theme-gold')"   title="Midnight Gold"  style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0a0800,#1a1200);border:2px solid rgba(201,153,58,.6);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
+        <div onclick="changeCardTheme('theme-sunset')" title="Sunset Orange"  style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1a0800,#2d1000);border:2px solid rgba(251,146,60,.5);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
+        <div onclick="changeCardTheme('theme-rose')"   title="Rose Blush"     style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#fff0f3,#ffe4ea);border:2px solid rgba(232,66,122,.4);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
+        <div onclick="changeCardTheme('theme-sky')"    title="Sky Blue"       style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#eef7ff,#dbeeff);border:2px solid rgba(0,119,204,.4);cursor:pointer;transition:.2s" onmouseover="this.style.transform='scale(1.25)'" onmouseout="this.style.transform=''"></div>
     </div>
 
     <div class="no-print text-center mb-3" style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--text-muted); letter-spacing:3px;">
@@ -1017,16 +1097,18 @@
 
     function changeCardTheme(theme) {
         const card = document.getElementById('printableCard');
-        card.className = '';
-        card.classList.add(theme);
+        card.className = theme;
+        document.getElementById('themeSelect').value = theme;
     }
 
     function saveAsImage() {
         const card = document.getElementById('printableCard');
+        const name = document.getElementById('empNameInCard').textContent.trim();
         showToast('⏳ جاري الحفظ...');
         html2canvas(card, { scale: 2.5, useCORS: true, backgroundColor: null }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `Birthday_${document.getElementById('empNameInCard').textContent.trim()}.png`;
+            // filename = employee name, spaces replaced with underscores
+            link.download = `عيد_ميلاد_${name.replace(/\s+/g,'_')}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
             showToast('✅ تم الحفظ بنجاح!');
@@ -1036,53 +1118,30 @@
     async function shareWhatsApp() {
         const name  = document.getElementById('empNameInCard').textContent.trim();
         const phone = formatPhone(currentPhone);
+        const card  = document.getElementById('printableCard');
 
         showToast('⏳ جاري تجهيز الصورة...');
-        const card = document.getElementById('printableCard');
 
         try {
             const canvas = await html2canvas(card, { scale: 2.5, useCORS: true, backgroundColor: null });
 
-            // Convert canvas → Blob → File
-            canvas.toBlob(async (blob) => {
-                const file = new File([blob], `Birthday_${name}.png`, { type: 'image/png' });
+            // 1. Save image to device
+            const link = document.createElement('a');
+            link.download = `عيد_ميلاد_${name.replace(/\s+/g,'_')}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
 
-                // Check if Web Share API supports files (mobile browsers)
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({ files: [file] });
-                        // After sharing, open WA chat if phone exists
-                        if (phone) {
-                            setTimeout(() => window.open(`https://wa.me/${phone}`, '_blank'), 800);
-                        }
-                    } catch(err) {
-                        if (err.name !== 'AbortError') fallbackDownload(canvas, name, phone);
-                    }
-                } else {
-                    // Desktop or unsupported → fallback
-                    fallbackDownload(canvas, name, phone);
-                }
-            }, 'image/png');
+            // 2. Open specific WA chat after short delay
+            setTimeout(() => {
+                const url = phone ? `https://wa.me/${phone}` : `https://wa.me/`;
+                window.open(url, '_blank');
+                showToast('✅ الصورة اتحفظت — ارفعها من 📎');
+            }, 800);
 
         } catch(e) {
             showToast('❌ حدث خطأ، حاول مرة أخرى');
             console.error(e);
         }
-    }
-
-    function fallbackDownload(canvas, name, phone) {
-        // Save image + show steps overlay (desktop fallback)
-        const link = document.createElement('a');
-        link.download = `Birthday_Card_${name}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        showToast('✅ تم حفظ الصورة');
-
-        const pendingUrl = phone ? `https://wa.me/${phone}` : `https://wa.me/`;
-        document.getElementById('waStep2Text').textContent = phone ? `فتح محادثة مع ${name}` : 'فتح واتساب';
-        document.getElementById('waStep2Sub').textContent  = phone ? currentPhone : 'لم يُضف رقم موبايل';
-        pendingWAUrl = pendingUrl;
-        setTimeout(() => document.getElementById('waStepsOverlay').classList.add('show'), 700);
     }
 
     function confirmOpenWA() {
