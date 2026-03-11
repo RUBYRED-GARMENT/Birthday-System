@@ -1,239 +1,1004 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RUBYRED | Interactive Birthday Dashboard</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>RUBYRED | Birthday Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Cairo:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
     <style>
-        :root { --ruby: #ff0000; --gold: #d4af37; --dark: #1a1a1a; --soft-bg: #f4f7f6; }
-        body { background: var(--soft-bg); font-family: 'Poppins', 'Cairo', sans-serif; padding-bottom: 50px; }
-        
-        /* Navbar */
-        .navbar { background: var(--dark); border-bottom: 4px solid var(--ruby); padding: 15px; position: sticky; top: 0; z-index: 1000; }
-        .navbar-brand { font-weight: 800; color: white !important; font-size: 1.8rem; }
-        .red-text { color: var(--ruby); }
-
-        /* Dashboard Stats - Interactive */
-        .stat-card { 
-            background: white; border-radius: 15px; padding: 20px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #ddd; 
-            cursor: pointer; transition: 0.3s;
+        :root {
+            --ruby: #e8001d;
+            --ruby-glow: rgba(232,0,29,0.35);
+            --ruby-dim: rgba(232,0,29,0.08);
+            --gold: #c9993a;
+            --gold-light: #f0c060;
+            --dark: #0d0d0d;
+            --surface: #161616;
+            --surface2: #1e1e1e;
+            --surface3: #282828;
+            --border: rgba(255,255,255,0.07);
+            --text: #f0ece6;
+            --text-muted: #7a7570;
+            --success: #22c55e;
+            --near: #f59e0b;
         }
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-        .stat-card.active-filter { border-left-width: 10px; background: #fffdfd; border-left-color: var(--dark); }
-        .stat-card.alert { border-left-color: var(--ruby); }
-        .stat-card h3 { font-weight: 800; margin: 0; color: var(--dark); }
 
-        /* Pulse Animation */
-        @keyframes glowing-pulse {
-            0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.4); border-color: rgba(255, 0, 0, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.7); border-color: var(--ruby); transform: scale(1.02); }
-            100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.4); border-color: rgba(255, 0, 0, 0.5); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--dark);
+            font-family: 'Cairo', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        .pulse-border { animation: glowing-pulse 1.5s infinite ease-in-out; border: 2px solid var(--ruby) !important; }
 
-        .card-box { background: white; border-radius: 15px; padding: 25px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        /* ── Animated Background ─────────────────────────── */
+        .bg-noise {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+        .bg-grid {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                              linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .bg-glow {
+            position: fixed; width: 600px; height: 600px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(232,0,29,0.06) 0%, transparent 70%);
+            top: -200px; left: -100px; pointer-events: none; z-index: 0;
+            animation: driftGlow 18s ease-in-out infinite alternate;
+        }
+        .bg-glow-2 {
+            position: fixed; width: 400px; height: 400px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(201,153,58,0.04) 0%, transparent 70%);
+            bottom: -100px; right: 0; pointer-events: none; z-index: 0;
+            animation: driftGlow 12s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes driftGlow {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(60px, 80px) scale(1.1); }
+        }
 
-        /* Studio Overlay */
+        /* ── Navbar ──────────────────────────────────────── */
+        .navbar {
+            background: rgba(13,13,13,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 18px 0;
+            position: sticky; top: 0; z-index: 500;
+        }
+        .brand-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem; font-weight: 900;
+            letter-spacing: 2px; color: var(--text);
+        }
+        .brand-text span { color: var(--ruby); }
+        .brand-sub {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem; letter-spacing: 4px;
+            color: var(--text-muted); margin-top: -4px;
+        }
+        .logo {
+            height: 46px;
+            animation: spin 10s linear infinite;
+            filter: drop-shadow(0 0 6px var(--ruby-glow));
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Page Wrapper ────────────────────────────────── */
+        .page-wrap { position: relative; z-index: 1; padding: 32px 0 80px; }
+
+        /* ── Section Label ───────────────────────────────── */
+        .section-eyebrow {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem; letter-spacing: 5px;
+            color: var(--ruby); text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem; font-weight: 700;
+            color: var(--text); margin-bottom: 0;
+        }
+
+        /* ── Stat Cards ──────────────────────────────────── */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px 20px 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(.4,0,.2,1);
+            position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute;
+            inset: 0; border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .stat-card:hover::before { opacity: 1; }
+        .stat-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.14); }
+        .stat-card.active-filter {
+            border-color: var(--ruby);
+            box-shadow: 0 0 0 1px var(--ruby), 0 8px 32px var(--ruby-glow);
+        }
+        .stat-card .icon-wrap {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; margin-bottom: 14px;
+        }
+        .stat-card .stat-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6rem; font-weight: 900; line-height: 1;
+            transition: all 0.5s;
+        }
+        .stat-card .stat-label {
+            font-size: 0.75rem; color: var(--text-muted);
+            margin-top: 4px; letter-spacing: 1px;
+        }
+        .icon-today  { background: rgba(34,197,94,0.12); }
+        .icon-near   { background: rgba(245,158,11,0.12); }
+        .icon-month  { background: rgba(232,0,29,0.12); }
+        .stat-today  { color: var(--success); }
+        .stat-near   { color: var(--near); }
+        .stat-month  { color: var(--ruby); }
+
+        /* ── Toolbar ─────────────────────────────────────── */
+        .toolbar {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 16px 20px;
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .search-wrap {
+            flex: 1; min-width: 200px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 10px; padding: 9px 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .search-wrap input {
+            background: none; border: none; outline: none;
+            color: var(--text); font-family: 'Cairo', sans-serif;
+            font-size: 0.88rem; width: 100%;
+        }
+        .search-wrap input::placeholder { color: var(--text-muted); }
+        .search-wrap .search-icon { color: var(--text-muted); font-size: 1rem; }
+        .month-select {
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--text); border-radius: 10px; padding: 9px 14px;
+            font-family: 'Cairo', sans-serif; font-size: 0.85rem; cursor: pointer;
+        }
+        .month-select option { background: var(--surface2); }
+        .toolbar-btn {
+            background: var(--surface2); border: 1px solid var(--border);
+            color: var(--text); border-radius: 10px; padding: 9px 16px;
+            font-family: 'Cairo', sans-serif; font-size: 0.82rem;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .toolbar-btn:hover { background: var(--surface3); border-color: rgba(255,255,255,0.15); }
+        .toolbar-btn.active { background: var(--ruby); border-color: var(--ruby); color: #fff; }
+
+        /* ── Grid Card ───────────────────────────────────── */
+        #monthGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+
+        .emp-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 18px 14px;
+            cursor: pointer; transition: all 0.28s cubic-bezier(.4,0,.2,1);
+            position: relative; overflow: hidden; text-align: center;
+        }
+        .emp-card::after {
+            content: ''; position: absolute;
+            bottom: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--ruby), transparent);
+            transform: scaleX(0); transition: transform 0.3s;
+        }
+        .emp-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.12); }
+        .emp-card:hover::after { transform: scaleX(1); }
+        .emp-card.is-today {
+            border-color: var(--success);
+            box-shadow: 0 0 0 1px var(--success), 0 8px 24px rgba(34,197,94,0.2);
+        }
+        .emp-card.is-today::after { background: linear-gradient(90deg, transparent, var(--success), transparent); transform: scaleX(1); }
+        .emp-card.is-near {
+            border-color: var(--near);
+            animation: nearPulse 2.2s ease-in-out infinite;
+        }
+        @keyframes nearPulse {
+            0%,100% { box-shadow: 0 0 6px rgba(245,158,11,0.2); }
+            50%      { box-shadow: 0 0 20px rgba(245,158,11,0.45), 0 0 0 1px var(--near); }
+        }
+
+        .emp-avatar {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: var(--surface3); margin: 0 auto 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; font-weight: 900;
+            font-family: 'Playfair Display', serif; color: var(--text-muted);
+            border: 2px solid var(--border); position: relative;
+        }
+        .emp-name { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+        .emp-date { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 10px; }
+        .emp-badge {
+            font-size: 0.65rem; padding: 3px 10px; border-radius: 20px;
+            font-weight: 600; letter-spacing: 0.5px;
+        }
+        .badge-today { background: rgba(34,197,94,0.12); color: var(--success); }
+        .badge-near  { background: rgba(245,158,11,0.12); color: var(--near); }
+        .countdown-ring {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.68rem; color: var(--near);
+            margin-top: 6px;
+        }
+        .age-chip {
+            font-size: 0.62rem; color: var(--text-muted);
+            background: var(--surface2); border-radius: 20px;
+            padding: 2px 8px; margin-top: 5px; display: inline-block;
+        }
+
+        /* ── Empty State ─────────────────────────────────── */
+        .empty-state {
+            grid-column: 1 / -1; text-align: center; padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.4; }
+
+        /* ── Studio Overlay ──────────────────────────────── */
         #studioOverlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 9999; overflow-y: auto; padding: 20px;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(12px);
+            z-index: 9999; overflow-y: auto; padding: 24px 16px 60px;
         }
-        .studio-nav { background: #000; padding: 15px; border-radius: 10px; display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .studio-nav {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 14px 20px; border-radius: 14px;
+            display: flex; justify-content: center; align-items: center;
+            gap: 10px; margin-bottom: 24px; flex-wrap: wrap;
+            max-width: 800px; margin-inline: auto;
+        }
+        .studio-btn {
+            border-radius: 10px; padding: 9px 18px; font-size: 0.82rem;
+            font-family: 'Cairo', sans-serif; font-weight: 600;
+            cursor: pointer; border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .s-btn-photo { background: var(--surface2); border-color: var(--border); color: var(--text); }
+        .s-btn-photo:hover { background: var(--surface3); }
+        .s-btn-save { background: var(--gold); color: #000; }
+        .s-btn-save:hover { background: var(--gold-light); }
+        .s-btn-print { background: var(--ruby); color: #fff; }
+        .s-btn-print:hover { filter: brightness(1.1); }
+        .s-btn-whatsapp { background: #25D366; color: #fff; }
+        .s-btn-close { background: var(--surface3); color: var(--text-muted); border-color: var(--border); }
 
-        /* Birthday Card Design */
+        /* ── Phone Badge ─────────────────────────────────── */
+        .phone-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.25);
+            border-radius: 10px; padding: 7px 14px;
+            font-family: 'Space Mono', monospace; font-size: 0.8rem;
+            color: #25D366; margin-bottom: 20px;
+        }
+        .phone-badge.no-phone {
+            background: rgba(255,255,255,0.04); border-color: var(--border);
+            color: var(--text-muted);
+        }
+        /* WA steps overlay */
+        #waStepsOverlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+            z-index: 99999; align-items: center; justify-content: center;
+        }
+        #waStepsOverlay.show { display: flex; }
+        .wa-steps-box {
+            background: var(--surface); border: 1px solid rgba(37,211,102,0.3);
+            border-radius: 20px; padding: 36px 32px; max-width: 380px; width: 90%;
+            text-align: center; box-shadow: 0 0 60px rgba(37,211,102,0.15);
+        }
+        .wa-step {
+            display: flex; align-items: flex-start; gap: 14px;
+            text-align: right; margin-bottom: 18px;
+            background: var(--surface2); border-radius: 12px; padding: 14px;
+        }
+        .wa-step-num {
+            min-width: 28px; height: 28px; border-radius: 50%;
+            background: #25D366; color: #000; font-weight: 900;
+            font-size: 0.8rem; display: flex; align-items: center; justify-content: center;
+            font-family: 'Space Mono', monospace;
+        }
+        .wa-step-done { background: rgba(37,211,102,0.15); border: 1px solid rgba(37,211,102,0.25); }
+        .wa-step-done .wa-step-num { background: rgba(37,211,102,0.2); color: #25D366; }
+        .wa-step-text { font-size: 0.85rem; color: var(--text); line-height: 1.5; }
+        .wa-step-sub  { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; }
+
+        /* ── Theme Selector ──────────────────────────────── */
+        .theme-selector {
+            display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;
+            max-width: 800px; margin-inline: auto;
+        }
+        .theme-btn {
+            padding: 6px 14px; border-radius: 8px; font-size: 0.72rem;
+            font-family: 'Cairo', sans-serif; cursor: pointer;
+            border: 1.5px solid transparent; transition: all 0.2s;
+            font-weight: 700; letter-spacing: 0.5px;
+        }
+        .theme-btn.active { border-color: var(--gold); }
+
+        /* ── Printable Card Themes ───────────────────────── */
         #printableCard {
-            width: 100%; max-width: 750px; background: white; margin: 0 auto;
-            padding: 50px; border: 15px double var(--gold); text-align: center; 
-            position: relative; direction: rtl; overflow: hidden;
+            width: 100%; max-width: 800px; margin: 0 auto;
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            position: relative;
         }
-        /* زينة الكارت */
-        #printableCard::before { content: '🎈'; position: absolute; top: 15px; left: 15px; font-size: 50px; opacity: 0.4; }
-        #printableCard::after { content: '🎊'; position: absolute; bottom: 15px; right: 15px; font-size: 50px; opacity: 0.4; }
+        .card-inner {
+            padding: 60px 50px 50px; text-align: center;
+            position: relative; direction: rtl;
+        }
 
-        .photo-frame { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--gold); margin: 0 auto 25px; overflow: hidden; background: #eee; position: relative; z-index: 2; }
+        /* Theme: Classic Dark */
+        .theme-dark .card-inner {
+            background: linear-gradient(145deg, #111 0%, #1a1a1a 50%, #111 100%);
+        }
+        .theme-dark .card-inner::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: radial-gradient(circle at 80% 20%, rgba(232,0,29,0.08) 0%, transparent 50%),
+                              radial-gradient(circle at 20% 80%, rgba(201,153,58,0.06) 0%, transparent 50%);
+        }
+
+        /* Theme: Ivory */
+        .theme-ivory .card-inner {
+            background: linear-gradient(145deg, #fdf8f0 0%, #fff9ed 60%, #fdf8f0 100%);
+        }
+        .theme-ivory .card-title { color: #1a1a1a !important; }
+        .theme-ivory .card-subtitle { color: #888 !important; }
+        .theme-ivory .card-name  { color: #1a1a1a !important; }
+        .theme-ivory .card-msg   { color: #444 !important; }
+        .theme-ivory .card-footer-brand { color: #1a1a1a !important; }
+
+        /* Theme: Ruby */
+        .theme-ruby .card-inner {
+            background: linear-gradient(145deg, #1a0000 0%, #200006 50%, #1a0000 100%);
+        }
+
+        /* Card border */
+        #printableCard { border: 2px solid rgba(201,153,58,0.3); }
+
+        /* Decorative corners */
+        .card-corner {
+            position: absolute; font-size: 3.5rem; opacity: 0.12; line-height: 1;
+            pointer-events: none;
+        }
+        .corner-tl { top: 14px; right: 14px; }
+        .corner-br { bottom: 14px; left: 14px; }
+
+        /* Card content */
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem; font-weight: 900; letter-spacing: 2px;
+            color: var(--text); margin-bottom: 4px; position: relative; z-index: 1;
+        }
+        .card-subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem; letter-spacing: 6px;
+            color: var(--text-muted); margin-bottom: 36px; position: relative; z-index: 1;
+        }
+        .gold-divider {
+            width: 80px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 16px auto;
+        }
+        .photo-frame {
+            width: 160px; height: 160px; border-radius: 50%;
+            border: 3px solid rgba(201,153,58,0.4);
+            box-shadow: 0 0 0 6px rgba(201,153,58,0.08), 0 16px 40px rgba(0,0,0,0.4);
+            margin: 0 auto 28px; overflow: hidden;
+            background: var(--surface3); position: relative; z-index: 2;
+        }
         #empPhoto { width: 100%; height: 100%; object-fit: cover; }
-        
-        .editable-field { font-family: 'Cairo', sans-serif; border-radius: 5px; transition: 0.2s; padding: 5px; font-weight: bold; }
-        .editable-field:focus { background: #fff9e6; outline: none; box-shadow: 0 0 5px var(--gold); }
-        .logo { height: 60px;
-        position: relative; right:5%;  
-        animation: spin 4s linear infinite;
-      transform-origin: center center !important;
-      display: block;
-}
-@keyframes spin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
+
+        .card-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6rem; font-weight: 900; color: var(--text);
+            margin-bottom: 4px; position: relative; z-index: 2;
+        }
+        .card-date {
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem; color: var(--gold);
+            margin-bottom: 32px; position: relative; z-index: 2;
+        }
+        .card-msg {
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.05rem; color: rgba(240,236,230,0.8);
+            line-height: 1.9; max-width: 540px; margin: 0 auto 36px;
+            position: relative; z-index: 2;
+        }
+        .card-headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem; font-weight: 900; color: var(--ruby);
+            margin-bottom: 32px; position: relative; z-index: 2;
+        }
+        .card-footer-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem; font-weight: 700;
+            color: var(--text); position: relative; z-index: 2;
+        }
+        .card-footer-brand span { color: var(--ruby); }
+        .card-footer-stamp {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem; color: var(--text-muted);
+            letter-spacing: 4px; margin-top: 8px;
+            position: relative; z-index: 2;
+        }
+
+        /* Editable fields */
+        [contenteditable="true"] {
+            border-radius: 6px; transition: all 0.2s;
+            outline: none; cursor: text;
+        }
+        [contenteditable="true"]:focus {
+            background: rgba(201,153,58,0.07);
+            box-shadow: 0 0 0 2px rgba(201,153,58,0.25);
+        }
+        [contenteditable="true"]:hover:not(:focus) {
+            background: rgba(255,255,255,0.03);
+        }
+
+        /* ── Scrollbar ───────────────────────────────────── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+        /* ── Print ───────────────────────────────────────── */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            #studioOverlay { position: static; background: white; padding: 0; }
+            #printableCard { box-shadow: none; }
+        }
+
+        /* ── Confetti ────────────────────────────────────── */
+        .confetti-piece {
+            position: fixed; width: 10px; height: 10px; top: -20px;
+            border-radius: 2px; z-index: 9998; pointer-events: none;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ── Progress Bar (Days) ─────────────────────────── */
+        .month-progress {
+            background: var(--surface2); border-radius: 4px; height: 4px;
+            margin-top: 8px; overflow: hidden;
+        }
+        .month-progress-fill {
+            height: 100%; border-radius: 4px;
+            background: linear-gradient(90deg, var(--ruby), var(--gold));
+            transition: width 1s ease;
+        }
+
+        /* Ripple on card click */
+        @keyframes ripple {
+            0%   { transform: scale(0); opacity: 0.4; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+        .ripple-dot {
+            position: absolute; width: 50px; height: 50px;
+            border-radius: 50%; background: var(--ruby-glow);
+            top: 50%; left: 50%; margin: -25px; pointer-events: none;
+            animation: ripple 0.6s ease-out forwards;
+        }
+
+        /* ── Toast ───────────────────────────────────────── */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: var(--surface); border: 1px solid var(--border);
+            color: var(--text); padding: 12px 24px; border-radius: 12px;
+            font-size: 0.85rem; z-index: 99999; opacity: 0;
+            transition: all 0.3s; pointer-events: none;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ── Stats Bar ───────────────────────────────────── */
+        .stats-bar {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 14px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 12px;
+        }
+        .stats-bar-item { font-size: 0.78rem; color: var(--text-muted); }
+        .stats-bar-item span { color: var(--text); font-weight: 700; margin-right: 4px; }
+
+        /* ── Responsive ──────────────────────────────────── */
+        @media (max-width: 600px) {
+            .card-title { font-size: 1.6rem; }
+            .card-name  { font-size: 1.8rem; }
+            .card-headline { font-size: 1.6rem; }
+            .card-inner { padding: 36px 24px 32px; }
+            #monthGrid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
 
+<!-- Background layers -->
+<div class="bg-noise"></div>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-glow-2"></div>
+<div id="toast"></div>
+
+<!-- Navbar -->
 <nav class="navbar no-print">
-    <div class="container d-flex justify-content-between">
-        <a class="navbar-brand" href="#">RUBY<span class="red-text">RED</span> GARMENT</a>
-        <img class="logo" src="pic/logooo.png" alt="">
-        <span class="text-white-50">BIRTHDAY SYSTEM</span>
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <div class="brand-text">RUBY<span>RED</span> GARMENT</div>
+            <div class="brand-sub">BIRTHDAY MANAGEMENT SYSTEM</div>
+        </div>
+        <img class="logo" src="pic/logooo.png" alt="logo" onerror="this.style.display='none'">
+        <div class="text-end">
+            <div style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--text-muted); letter-spacing:3px;" id="liveDate"></div>
+            <div style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--ruby); letter-spacing:2px;" id="liveClock"></div>
+        </div>
     </div>
 </nav>
 
-<div class="container no-print mt-4">
-    <div class="row g-3">
+<div class="page-wrap">
+<div class="container no-print">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <p class="section-eyebrow">DASHBOARD</p>
+        <h1 class="section-title">Birthday Celebrations</h1>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
         <div class="col-md-4" onclick="applyFilter('today')">
             <div id="filterToday" class="stat-card">
-                <p>Today's Celebrations</p>
-                <h3 id="statToday">0</h3>
+                <div class="icon-wrap icon-today">🎂</div>
+                <div class="stat-num stat-today" id="statToday">0</div>
+                <div class="stat-label">CELEBRATING TODAY</div>
             </div>
         </div>
         <div class="col-md-4" onclick="applyFilter('near')">
-            <div id="filterNear" class="stat-card alert">
-                <p>Urgent Pulses (Next 5 Days)</p>
-                <h3 id="statPulse" class="red-text">0</h3>
+            <div id="filterNear" class="stat-card">
+                <div class="icon-wrap icon-near">⚡</div>
+                <div class="stat-num stat-near" id="statPulse">0</div>
+                <div class="stat-label">UPCOMING · NEXT 7 DAYS</div>
             </div>
         </div>
         <div class="col-md-4" onclick="applyFilter('all')">
             <div id="filterAll" class="stat-card active-filter">
-                <p>Total This Month</p>
-                <h3 id="statMonth">0</h3>
+                <div class="icon-wrap icon-month">📅</div>
+                <div class="stat-num stat-month" id="statMonth">0</div>
+                <div class="stat-label">TOTAL THIS MONTH</div>
+                <div class="month-progress mt-2">
+                    <div class="month-progress-fill" id="monthProgress" style="width:0%"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="card-box">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="fw-bold m-0 text-secondary" id="gridTitle">🗓️ Monthly Birthday Calendar</h5>
-            <span class="badge bg-dark" id="filterStatus">Showing: All Month</span>
+    <!-- Stats Bar -->
+    <div class="stats-bar mb-3">
+        <div class="stats-bar-item"><span id="totalCount">0</span> إجمالي الموظفين</div>
+        <div class="stats-bar-item"><span id="nextBirthday">—</span> أقرب عيد ميلاد</div>
+        <div class="stats-bar-item"><span id="mostMonth">—</span> أكثر شهر احتفالاً</div>
+        <div class="stats-bar-item" id="loadStatus" style="color:var(--ruby)">⏳ جاري التحميل...</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar mb-4">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="ابحث باسم الموظف..." oninput="renderGrid()">
         </div>
-        <div id="monthGrid" class="row g-3"></div>
+        <select class="month-select" id="monthSelect" onchange="renderGrid()">
+            <option value="-1">كل الأشهر</option>
+            <option value="0">يناير</option><option value="1">فبراير</option>
+            <option value="2">مارس</option><option value="3">أبريل</option>
+            <option value="4">مايو</option><option value="5">يونيو</option>
+            <option value="6">يوليو</option><option value="7">أغسطس</option>
+            <option value="8">سبتمبر</option><option value="9">أكتوبر</option>
+            <option value="10">نوفمبر</option><option value="11">ديسمبر</option>
+        </select>
+        <button class="toolbar-btn" id="sortBtn" onclick="toggleSort()">↕ ترتيب</button>
+        <button class="toolbar-btn" id="todayFilterBtn" onclick="applyFilter('today')">🎂 اليوم</button>
+        <button class="toolbar-btn" onclick="applyFilter('all')">📅 الكل</button>
+        <button class="toolbar-btn" onclick="fetchData()">🔄 تحديث</button>
+    </div>
+
+    <!-- Grid -->
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <div>
+            <p class="section-eyebrow mb-0">RECORDS</p>
+            <h2 class="section-title" style="font-size:1.1rem;" id="gridTitle">📋 عرض جميع أعياد الميلاد</h2>
+        </div>
+        <span style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--text-muted);" id="gridCount">0 موظف</span>
+    </div>
+    <div id="monthGrid"></div>
+
+</div>
+</div>
+
+<!-- Studio Overlay -->
+<div id="studioOverlay">
+    <div class="studio-nav no-print">
+        <label class="studio-btn s-btn-photo">
+            📸 رفع صورة
+            <input type="file" hidden accept="image/*" onchange="loadPhoto(event)">
+        </label>
+        <select class="month-select no-print" onchange="changeCardTheme(this.value)" style="font-size:0.8rem;">
+            <option value="theme-dark">🌑 Dark Classic</option>
+            <option value="theme-ivory">🤍 Ivory Luxury</option>
+            <option value="theme-ruby">❤️ Deep Ruby</option>
+        </select>
+        <button class="studio-btn s-btn-save" onclick="saveAsImage()">💾 حفظ كصورة</button>
+        <button class="studio-btn s-btn-print" onclick="window.print()">🖨️ طباعة</button>
+        <button class="studio-btn s-btn-whatsapp" onclick="shareWhatsApp()">📤 واتساب</button>
+        <button class="studio-btn s-btn-close" onclick="closeStudio()">✕ إغلاق</button>
+    </div>
+
+    <!-- Phone badge shown in studio -->
+    <div class="text-center mb-2 no-print">
+        <div id="phoneBadge" class="phone-badge no-phone" style="display:inline-flex;">
+            <span>📵</span><span id="phoneBadgeText">لا يوجد رقم موبايل</span>
+        </div>
+    </div>
+
+    <div class="no-print text-center mb-3" style="font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--text-muted); letter-spacing:3px;">
+        ✏️ انقر على أي نص داخل الكارت لتعديله
+    </div>
+
+    <div id="printableCard" class="theme-dark">
+        <div class="card-inner">
+            <div class="card-corner corner-tl">🎈</div>
+            <div class="card-corner corner-br">🎊</div>
+
+            <div class="card-title">RUBY<span style="color:var(--ruby)">RED</span></div>
+            <div class="card-subtitle">GARMENT &nbsp;·&nbsp; OFFICIAL BIRTHDAY CARD</div>
+            <div class="gold-divider"></div>
+
+            <div class="photo-frame"><img id="empPhoto" src="https://api.dicebear.com/7.x/shapes/svg?seed=ruby" alt=""></div>
+
+            <div id="empNameInCard" class="card-name" contenteditable="true">اسم الموظف</div>
+            <div id="cardBdayDisplay" class="card-date" contenteditable="true">01 يناير</div>
+
+            <div class="gold-divider"></div>
+
+            <div id="cardMsg" class="card-msg" contenteditable="true">
+                تتقدم إدارة شركة RUBYRED GARMENT بأصدق التهاني والتبريكات بمناسبة عيد ميلادكم السعيد، متمنين لكم عاماً حافلاً بالصحة والسعادة والنجاح في مسيرتكم المهنية معنا.
+            </div>
+
+            <div class="card-headline" contenteditable="true">كل عام وأنتم بخير 🎉</div>
+
+            <div class="gold-divider"></div>
+
+            <div class="card-footer-brand">RUBY<span>RED</span> GARMENT</div>
+            <div class="card-footer-stamp" id="cardYear"></div>
+        </div>
     </div>
 </div>
 
-<div id="studioOverlay">
-    <div class="studio-nav no-print">
-        <label class="btn btn-outline-light btn-sm">📸 رفع صورة <input type="file" hidden onchange="loadPhoto(event)"></label>
-        <button class="btn btn-success btn-sm px-4" onclick="saveAsImage()">💾 حفظ كصورة</button>
-        <button class="btn btn-primary btn-sm px-4" onclick="window.print()">🖨️ طباعة</button>
-        <button class="btn btn-danger btn-sm" onclick="closeStudio()">✕ إغلاق</button>
-    </div>
+<!-- WA Steps Overlay -->
+<div id="waStepsOverlay">
+    <div class="wa-steps-box">
+        <div style="font-size:2.5rem; margin-bottom:12px;">📲</div>
+        <h3 style="font-family:'Playfair Display',serif; font-size:1.3rem; margin-bottom:6px; color:var(--text);">إرسال عبر واتساب</h3>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:22px; letter-spacing:0.5px;">اتبع الخطوات التالية</p>
 
-    <div id="printableCard">
-        <h1 style="color:#000; font-weight:900; margin:0; font-size: 45px; letter-spacing: 1px;">
-            RUBY<span style="color:var(--ruby)">RED</span> GARMENT
-        </h1>
-        <p style="color:var(--gold); font-weight:900; letter-spacing:5px; font-size:14px; margin-bottom: 30px; text-transform: uppercase;">Official Birthday Card</p>
-        
-        <div class="photo-frame"><img id="empPhoto" src="https://via.placeholder.com/150?text=صورة+الموظف"></div>
-        
-        <div id="empNameInCard" class="editable-field" contenteditable="true" style="font-size:38px; font-weight:900; color:#1a1a1a; margin-bottom:5px;">اسم الموظف هنا</div>
-        <div id="cardBdayDisplay" class="editable-field" contenteditable="true" style="color:var(--gold); font-weight:900; margin-bottom:25px; font-size: 22px;">01 يناير 2026</div>
-        
-        <div class="editable-field" contenteditable="true" style="font-size:22px; color:#333; line-height:1.7; max-width:90%; margin:0 auto; font-weight: 700;">
-            تتقدم إدارة شركة RUBYRED GARMENT بأصدق التهاني بمناسبة عيد ميلادكم السعيد، متمنين لكم عاماً مليئاً بالنجاح والتوفيق في مسيرتكم المهنية معنا.
+        <div class="wa-step wa-step-done" id="waStep1">
+            <div class="wa-step-num">✓</div>
+            <div>
+                <div class="wa-step-text">تم حفظ الكارت كصورة</div>
+                <div class="wa-step-sub">راجع مجلد التنزيلات على جهازك</div>
+            </div>
         </div>
-        
-        <h2 style="color:var(--ruby); margin-top:40px; font-weight:900; font-size: 38px;">كل عام وأنتم بخير</h2>
-        
-        <div class="editable-field" contenteditable="true" style="margin-top: 25px; font-weight: 900; font-size: 26px;">
-            RUBY<span style="color:red">RED</span> GARMENT
+
+        <div class="wa-step" id="waStep2">
+            <div class="wa-step-num">2</div>
+            <div>
+                <div class="wa-step-text" id="waStep2Text">فتح محادثة واتساب</div>
+                <div class="wa-step-sub" id="waStep2Sub">مع الموظف مباشرة</div>
+            </div>
         </div>
+
+        <div class="wa-step" id="waStep3">
+            <div class="wa-step-num">3</div>
+            <div>
+                <div class="wa-step-text">ارفق الصورة المحفوظة وابعتها</div>
+                <div class="wa-step-sub">📎 من المرفقات اختار الصورة من التنزيلات</div>
+            </div>
+        </div>
+
+        <button onclick="confirmOpenWA()"
+            style="background:#25D366; color:#000; border:none; border-radius:12px;
+                   padding:12px 32px; font-family:'Cairo',sans-serif; font-weight:700;
+                   font-size:0.9rem; cursor:pointer; width:100%; margin-top:10px;
+                   transition:filter 0.2s;"
+            onmouseover="this.style.filter='brightness(1.1)'"
+            onmouseout="this.style.filter=''">
+            📱 افتح واتساب الآن
+        </button>
+        <button onclick="document.getElementById('waStepsOverlay').classList.remove('show')"
+            style="background:none; border:none; color:var(--text-muted); font-family:'Cairo',sans-serif;
+                   font-size:0.8rem; cursor:pointer; margin-top:12px; width:100%;">
+            إغلاق
+        </button>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwR43frr6oz2hrBVzNMxbqGN3jn6rbwzI3iNgOWCkWtknLWLrTW6eO7akPT7DLyURZGVg/exec"; 
+    /* ── Config ──────────────────────────────────── */
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwR43frr6oz2hrBVzNMxbqGN3jn6rbwzI3iNgOWCkWtknLWLrTW6eO7akPT7DLyURZGVg/exec";
+
     let allEmployees = [];
     let currentFilter = 'all';
+    let sortAsc = true;
 
-    async function fetchData() {
-        try {
-            const res = await fetch(SCRIPT_URL);
-            allEmployees = await res.json();
-            updateDashboard();
-        } catch (e) { console.error("Error", e); }
+    /* ── Date helpers ────────────────────────────── */
+    const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const MONTHS_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    function getToday() {
+        const d = new Date(); d.setHours(0,0,0,0); return d;
     }
 
-    function updateDashboard() {
+    function getBirthThisYear(bDate, year) {
+        return new Date(year, bDate.getMonth(), bDate.getDate());
+    }
+
+    function getDiffDays(bDate) {
+        const today = getToday();
+        let bThis = getBirthThisYear(bDate, today.getFullYear());
+        let diff = Math.round((bThis - today) / 86400000);
+        if (diff < 0) {
+            bThis = getBirthThisYear(bDate, today.getFullYear() + 1);
+            diff  = Math.round((bThis - today) / 86400000);
+        }
+        return diff;
+    }
+
+    function calcAge(bDate) {
+        const today = getToday();
+        let age = today.getFullYear() - bDate.getFullYear();
+        if (today < getBirthThisYear(bDate, today.getFullYear())) age--;
+        return age;
+    }
+
+    function isToday(bDate) {
+        const t = getToday();
+        return bDate.getDate() === t.getDate() && bDate.getMonth() === t.getMonth();
+    }
+
+    /* ── Clock ───────────────────────────────────── */
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('liveClock').textContent =
+            now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById('liveDate').textContent =
+            now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    setInterval(updateClock, 1000); updateClock();
+    document.getElementById('cardYear').textContent = new Date().getFullYear();
+
+    /* ── Fetch ───────────────────────────────────── */
+    async function fetchData() {
+        document.getElementById('loadStatus').textContent = '⏳ جاري التحميل...';
+        try {
+            const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+            allEmployees = await res.json();
+            // set default month to current
+            document.getElementById('monthSelect').value = getToday().getMonth();
+            updateDashboard();
+            document.getElementById('loadStatus').textContent = '✅ تم التحديث';
+            setTimeout(() => document.getElementById('loadStatus').textContent = '', 3000);
+        } catch(e) {
+            document.getElementById('loadStatus').textContent = '❌ فشل التحميل';
+            console.error(e);
+            // Demo data for preview
+            allEmployees = generateDemoData();
+            updateDashboard();
+        }
+    }
+
+    function generateDemoData() {
+        const names = ['أحمد محمد','سارة علي','محمود حسن','نور خالد','يوسف إبراهيم','ليلى سعد','عمر عبدالله','هناء مصطفى','كريم طه','دينا فاروق'];
         const today = new Date();
-        today.setHours(0,0,0,0);
-        
+        return names.map((name, i) => {
+            const d = new Date(today.getFullYear() - (25 + i), (today.getMonth() + i - 2 + 12) % 12, (i * 3 + 1) % 28 + 1);
+            return { name, birthdate: d.toISOString().split('T')[0], phone: `0101234567${i}` };
+        });
+    }
+
+    /* ── Dashboard update ────────────────────────── */
+    function updateDashboard() {
+        const today = getToday();
         let countToday = 0, countNear = 0, countMonth = 0;
+        const monthCounts = Array(12).fill(0);
 
         allEmployees.forEach(emp => {
-            if(!emp.birthdate) return;
+            if (!emp.birthdate) return;
             const bDate = new Date(emp.birthdate);
-            const bThisYear = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
-            const diffDays = Math.round((bThisYear - today) / (1000 * 60 * 60 * 24));
-            
-            if(bDate.getMonth() === today.getMonth()) countMonth++;
-            if(bDate.getDate() === today.getDate() && bDate.getMonth() === today.getMonth()) countToday++;
-            if(diffDays > 0 && diffDays <= 5) countNear++;
+            if (isNaN(bDate)) return;
+            const diff = getDiffDays(bDate);
+            monthCounts[bDate.getMonth()]++;
+            if (isToday(bDate)) countToday++;
+            if (diff > 0 && diff <= 7) countNear++;
+            if (bDate.getMonth() === today.getMonth()) countMonth++;
         });
 
-        document.getElementById('statToday').innerText = countToday;
-        document.getElementById('statPulse').innerText = countNear;
-        document.getElementById('statMonth').innerText = countMonth;
+        animateNum('statToday', countToday);
+        animateNum('statPulse',  countNear);
+        animateNum('statMonth',  countMonth);
+
+        // Month progress
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        document.getElementById('monthProgress').style.width = Math.round((today.getDate() / daysInMonth) * 100) + '%';
+
+        // Stats bar
+        document.getElementById('totalCount').textContent = allEmployees.length;
+        const sorted = [...allEmployees]
+            .filter(e => e.birthdate && !isNaN(new Date(e.birthdate)))
+            .sort((a, b) => getDiffDays(new Date(a.birthdate)) - getDiffDays(new Date(b.birthdate)));
+        if (sorted.length) {
+            const next = sorted[0];
+            const bDate = new Date(next.birthdate);
+            const diff = getDiffDays(bDate);
+            document.getElementById('nextBirthday').textContent = diff === 0 ? `${next.name} (اليوم!)` : `${next.name} (خلال ${diff} أيام)`;
+        }
+        const peakIdx = monthCounts.indexOf(Math.max(...monthCounts));
+        document.getElementById('mostMonth').textContent = MONTHS_AR[peakIdx] + ` (${monthCounts[peakIdx]})`;
+
+        // Confetti if birthdays today
+        if (countToday > 0) launchConfetti();
 
         renderGrid();
     }
 
+    /* ── Number animation ────────────────────────── */
+    function animateNum(id, target) {
+        const el = document.getElementById(id);
+        let start = parseInt(el.textContent) || 0;
+        const step = Math.ceil(Math.abs(target - start) / 20) || 1;
+        const dir = target > start ? 1 : -1;
+        const tick = () => {
+            start += dir * step;
+            if ((dir > 0 && start >= target) || (dir < 0 && start <= target)) { el.textContent = target; return; }
+            el.textContent = start;
+            requestAnimationFrame(tick);
+        };
+        tick();
+    }
+
+    /* ── Filter ──────────────────────────────────── */
     function applyFilter(filter) {
         currentFilter = filter;
         document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
-        
-        if(filter === 'today') document.getElementById('filterToday').classList.add('active-filter');
-        if(filter === 'near') document.getElementById('filterNear').classList.add('active-filter');
-        if(filter === 'all') document.getElementById('filterAll').classList.add('active-filter');
-
-        document.getElementById('filterStatus').innerText = "Showing: " + filter.toUpperCase();
+        document.getElementById('filter' + filter.charAt(0).toUpperCase() + filter.slice(1)).classList.add('active-filter');
+        const labels = { today: '🎂 أعياد ميلاد اليوم', near: '⚡ خلال 7 أيام', all: '📋 جميع الأشهر' };
+        document.getElementById('gridTitle').textContent = labels[filter];
         renderGrid();
     }
 
+    function toggleSort() {
+        sortAsc = !sortAsc;
+        document.getElementById('sortBtn').textContent = sortAsc ? '↑ تصاعدي' : '↓ تنازلي';
+        renderGrid();
+    }
+
+    /* ── Render Grid ─────────────────────────────── */
     function renderGrid() {
         const grid = document.getElementById('monthGrid');
         grid.innerHTML = '';
-        const today = new Date();
-        today.setHours(0,0,0,0);
+        const today = getToday();
+        const search = document.getElementById('searchInput').value.trim().toLowerCase();
+        const monthFilter = parseInt(document.getElementById('monthSelect').value);
 
-        allEmployees.forEach(emp => {
+        let list = allEmployees.filter(emp => {
+            if (!emp.birthdate) return false;
             const bDate = new Date(emp.birthdate);
-            const bThisYear = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
-            const diffDays = Math.round((bThisYear - today) / (1000 * 60 * 60 * 24));
-            
-            const isToday = (bDate.getDate() === today.getDate() && bDate.getMonth() === today.getMonth());
-            const isNear = (diffDays > 0 && diffDays <= 5);
-            const isThisMonth = (bDate.getMonth() === today.getMonth());
+            if (isNaN(bDate)) return false;
+            if (search && !emp.name.toLowerCase().includes(search)) return false;
 
-            if(currentFilter === 'today' && !isToday) return;
-            if(currentFilter === 'near' && !isNear) return;
-            if(currentFilter === 'all' && !isThisMonth) return;
+            const diff = getDiffDays(bDate);
+            const todayFlag = isToday(bDate);
+            const nearFlag  = diff > 0 && diff <= 7;
 
-            if(isThisMonth || isToday) {
-                const col = document.createElement('div');
-                col.className = 'col-6 col-md-3 col-lg-2';
-                col.innerHTML = `
-                    <div class="p-3 border rounded bg-white text-center h-100 ${isNear ? 'pulse-border' : ''} ${isToday ? 'border-success' : ''}" 
-                         style="cursor:pointer" onclick="openStudio('${emp.name}', '${bDate.toLocaleDateString('ar-EG', {day:'numeric', month:'long'})}')">
-                        <div class="fw-bold" style="font-size:13px;">${emp.name}</div>
-                        <div class="text-muted small">${bDate.getDate()} ${bDate.toLocaleString('en', {month:'short'})}</div>
-                        ${isNear ? `<span class="badge bg-danger mt-2">خلال ${diffDays} أيام</span>` : ''}
-                        ${isToday ? `<span class="badge bg-success mt-2">اليوم 🎉</span>` : ''}
-                    </div>
-                `;
-                grid.appendChild(col);
-            }
+            if (currentFilter === 'today') return todayFlag;
+            if (currentFilter === 'near')  return nearFlag;
+
+            // 'all' filter — respect month picker
+            if (monthFilter === -1) return true;
+            return bDate.getMonth() === monthFilter;
+        });
+
+        // Sort
+        list.sort((a, b) => {
+            const da = getDiffDays(new Date(a.birthdate));
+            const db = getDiffDays(new Date(b.birthdate));
+            return sortAsc ? da - db : db - da;
+        });
+
+        document.getElementById('gridCount').textContent = list.length + ' موظف';
+
+        if (!list.length) {
+            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🎈</div><div style="font-size:.9rem">لا توجد نتائج لهذا التصفية</div></div>`;
+            return;
+        }
+
+        list.forEach((emp, idx) => {
+            const bDate = new Date(emp.birthdate);
+            const diff   = getDiffDays(bDate);
+            const todayFlag = isToday(bDate);
+            const nearFlag  = diff > 0 && diff <= 7;
+            const age    = calcAge(bDate);
+            const initials = emp.name.trim().split(' ').map(w => w[0]).join('').slice(0, 2);
+
+            const phone = emp.mobile || emp['mobile'] || '';
+            const escapedName  = emp.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+            const escapedPhone = phone.toString().replace(/'/g,"\\'");
+
+            const col = document.createElement('div');
+            col.style.animationDelay = (idx * 0.04) + 's';
+            col.innerHTML = `
+                <div class="emp-card ${todayFlag ? 'is-today' : ''} ${nearFlag ? 'is-near' : ''}"
+                     onclick="openStudio('${escapedName}', '${bDate.getDate()} ${MONTHS_AR[bDate.getMonth()]}', '${escapedPhone}'); addRipple(event)">
+                    <div class="emp-avatar">${initials}</div>
+                    <div class="emp-name">${emp.name}</div>
+                    <div class="emp-date">${bDate.getDate()} ${MONTHS_EN[bDate.getMonth()]}</div>
+                    ${todayFlag ? `<span class="emp-badge badge-today">🎉 اليوم</span>` : ''}
+                    ${nearFlag  ? `<span class="emp-badge badge-near">⚡ ${diff} أيام</span>` : ''}
+                    ${!todayFlag && !nearFlag ? `<div class="countdown-ring">${diff === 1 ? 'غداً 🔔' : diff + ' يوم'}</div>` : ''}
+                    <div class="age-chip">${age} عاماً • ${MONTHS_AR[bDate.getMonth()]}</div>
+                    ${phone ? `<div style="font-size:0.6rem;color:#25D366;margin-top:4px;">📱</div>` : ''}
+                </div>
+            `;
+            grid.appendChild(col);
         });
     }
 
-    function openStudio(name, date) {
+    /* ── Ripple ──────────────────────────────────── */
+    function addRipple(e) {
+        const card = e.currentTarget;
+        const r = document.createElement('div');
+        r.className = 'ripple-dot';
+        card.appendChild(r);
+        setTimeout(() => r.remove(), 600);
+    }
+
+    /* ── Studio ──────────────────────────────────── */
+    let currentPhone = '';
+    let pendingWAUrl  = '';
+
+    function openStudio(name, date, phone) {
+        document.getElementById('empNameInCard').textContent = name;
+        document.getElementById('cardBdayDisplay').textContent = date;
+
+        // Phone badge
+        currentPhone = phone || '';
+        const badge    = document.getElementById('phoneBadge');
+        const badgeTxt = document.getElementById('phoneBadgeText');
+        if (currentPhone) {
+            badge.classList.remove('no-phone');
+            badge.innerHTML = `<span>📱</span><span>${currentPhone}</span>`;
+        } else {
+            badge.classList.add('no-phone');
+            badge.innerHTML = `<span>📵</span><span>لا يوجد رقم موبايل — أضف عمود phone في الشيت</span>`;
+        }
+
         document.getElementById('studioOverlay').style.display = 'block';
-        document.getElementById('empNameInCard').innerText = name;
-        document.getElementById('cardBdayDisplay').innerText = date;
         document.body.style.overflow = 'hidden';
     }
 
@@ -243,23 +1008,132 @@
     }
 
     function loadPhoto(event) {
+        const file = event.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
-        reader.onload = function() {
-            document.getElementById('empPhoto').src = reader.result;
-        }
-        reader.readAsDataURL(event.target.files[0]);
+        reader.onload = () => { document.getElementById('empPhoto').src = reader.result; };
+        reader.readAsDataURL(file);
+    }
+
+    function changeCardTheme(theme) {
+        const card = document.getElementById('printableCard');
+        card.className = '';
+        card.classList.add(theme);
     }
 
     function saveAsImage() {
         const card = document.getElementById('printableCard');
-        html2canvas(card, { scale: 2 }).then(canvas => {
+        showToast('⏳ جاري الحفظ...');
+        html2canvas(card, { scale: 2.5, useCORS: true, backgroundColor: null }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `Birthday_${document.getElementById('empNameInCard').innerText}.png`;
-            link.href = canvas.toDataURL();
+            link.download = `Birthday_${document.getElementById('empNameInCard').textContent.trim()}.png`;
+            link.href = canvas.toDataURL('image/png');
             link.click();
+            showToast('✅ تم الحفظ بنجاح!');
         });
     }
 
+    async function shareWhatsApp() {
+        const name  = document.getElementById('empNameInCard').textContent.trim();
+        const phone = formatPhone(currentPhone);
+
+        showToast('⏳ جاري تجهيز الصورة...');
+        const card = document.getElementById('printableCard');
+
+        try {
+            const canvas = await html2canvas(card, { scale: 2.5, useCORS: true, backgroundColor: null });
+
+            // Convert canvas → Blob → File
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], `Birthday_${name}.png`, { type: 'image/png' });
+
+                // Check if Web Share API supports files (mobile browsers)
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({ files: [file] });
+                        // After sharing, open WA chat if phone exists
+                        if (phone) {
+                            setTimeout(() => window.open(`https://wa.me/${phone}`, '_blank'), 800);
+                        }
+                    } catch(err) {
+                        if (err.name !== 'AbortError') fallbackDownload(canvas, name, phone);
+                    }
+                } else {
+                    // Desktop or unsupported → fallback
+                    fallbackDownload(canvas, name, phone);
+                }
+            }, 'image/png');
+
+        } catch(e) {
+            showToast('❌ حدث خطأ، حاول مرة أخرى');
+            console.error(e);
+        }
+    }
+
+    function fallbackDownload(canvas, name, phone) {
+        // Save image + show steps overlay (desktop fallback)
+        const link = document.createElement('a');
+        link.download = `Birthday_Card_${name}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('✅ تم حفظ الصورة');
+
+        const pendingUrl = phone ? `https://wa.me/${phone}` : `https://wa.me/`;
+        document.getElementById('waStep2Text').textContent = phone ? `فتح محادثة مع ${name}` : 'فتح واتساب';
+        document.getElementById('waStep2Sub').textContent  = phone ? currentPhone : 'لم يُضف رقم موبايل';
+        pendingWAUrl = pendingUrl;
+        setTimeout(() => document.getElementById('waStepsOverlay').classList.add('show'), 700);
+    }
+
+    function confirmOpenWA() {
+        document.getElementById('waStepsOverlay').classList.remove('show');
+        window.open(pendingWAUrl, '_blank');
+    }
+
+    function formatPhone(raw) {
+        if (!raw) return '';
+        let p = raw.toString().replace(/\D/g, ''); // digits only
+        if (p.startsWith('20'))  return p;          // already has country code
+        if (p.startsWith('0'))   return '20' + p.slice(1); // 01xxxxxxx → 201xxxxxxx
+        return p;
+    }
+
+    /* ── Confetti ────────────────────────────────── */
+    function launchConfetti() {
+        const colors = ['#e8001d','#c9993a','#f0c060','#fff','#22c55e'];
+        for (let i = 0; i < 80; i++) {
+            setTimeout(() => {
+                const p = document.createElement('div');
+                p.className = 'confetti-piece';
+                p.style.cssText = `
+                    left: ${Math.random() * 100}vw;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    width: ${6 + Math.random() * 8}px;
+                    height: ${6 + Math.random() * 8}px;
+                    border-radius: ${Math.random() > .5 ? '50%' : '2px'};
+                    animation-duration: ${2.5 + Math.random() * 3}s;
+                    animation-delay: ${Math.random() * 1}s;
+                `;
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 6000);
+            }, i * 30);
+        }
+    }
+
+    /* ── Toast ───────────────────────────────────── */
+    function showToast(msg, dur = 2500) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), dur);
+    }
+
+    /* ── Keyboard shortcuts ──────────────────────── */
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeStudio();
+        if (e.ctrlKey && e.key === 'f') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+    });
+
+    /* ── Init ────────────────────────────────────── */
     fetchData();
 </script>
 </body>
